@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.hibernate.Length;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -60,6 +61,7 @@ public class QuizEntity extends BaseEntity {
     @Column(name = "created_date", columnDefinition = "timestamptz", nullable = false)
     private Instant createdDate;
 
+    @CreatedBy
     @ManyToOne(optional = false)
     @JoinColumn(name = "owner_id", nullable = false)
     private UserEntity owner;

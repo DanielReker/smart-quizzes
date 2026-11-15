@@ -33,7 +33,7 @@ public interface QuizMapper {
     );
 
 
-    QuizResponse toResponse(QuizEntity entity, Long mySubmissionsCount);
+    QuizResponse toResponse(QuizEntity entity);
 
     ShortQuizResponse toShortResponse(QuizEntity entity);
 

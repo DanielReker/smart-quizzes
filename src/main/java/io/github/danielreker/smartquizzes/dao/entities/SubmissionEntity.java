@@ -5,6 +5,7 @@ import io.github.danielreker.smartquizzes.dao.entities.auth.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -33,6 +34,7 @@ public class SubmissionEntity extends BaseEntity {
     @OneToMany(mappedBy = "submission", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<AnswerEntity> answers = new ArrayList<>();
 
+    @CreatedBy
     @ManyToOne(optional = false)
     @JoinColumn(name = "owner_id", nullable = false)
     private UserEntity owner;

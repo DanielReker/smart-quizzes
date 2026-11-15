@@ -9,9 +9,7 @@ import io.github.danielreker.smartquizzes.dao.repositories.SubmissionRepository;
 import io.github.danielreker.smartquizzes.mappers.QuestionMapper;
 import io.github.danielreker.smartquizzes.mappers.QuizMapper;
 import io.github.danielreker.smartquizzes.mappers.SubmissionMapper;
-import io.github.danielreker.smartquizzes.model.auth.AuthenticatedUser;
 import io.github.danielreker.smartquizzes.model.exceptions.InvalidQuizStatusException;
-import io.github.danielreker.smartquizzes.services.auth.UserService;
 import io.github.danielreker.smartquizzes.services.question.AiQuestionGeneratorService;
 import io.github.danielreker.smartquizzes.web.QuizUpdateRequest;
 import io.github.danielreker.smartquizzes.web.dtos.*;
@@ -42,36 +40,26 @@ public class QuizService {
 
     private final QuestionManagerService questionManagerService;
 
-    private final UserService userService;
-
-    private final QuizSecurityService quizSecurityService;
-
     private final QuestionMapper questionMapper;
 
     private final AiQuestionGeneratorService aiQuestionGeneratorService;
 
 
     public QuizResponse createQuiz(
-            QuizCreateRequest request,
-            AuthenticatedUser user
+            QuizCreateRequest request
     ) {
         QuizEntity quizEntity = quizMapper.createRequestToEntity(request);
         quizEntity.setStatus(QuizStatus.DRAFT);
-        quizEntity.setOwner(userService.getUserReference(user));
 
         quizEntity = quizRepository.save(quizEntity);
 
-        return quizMapper.toResponse(
-                quizEntity,
-                quizSecurityService.countUserSubmissionsToQuiz(user.getId(), quizEntity.getId())
-        );
+        return quizMapper.toResponse(quizEntity);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') or @quizSecurityService.isUserQuizOwner(authentication.principal.id, #quizId)")
     public QuizResponse updateQuiz(
             UUID quizId,
-            QuizUpdateRequest request,
-            AuthenticatedUser user
+            QuizUpdateRequest request
     ) {
         QuizEntity quizEntity = findQuizEntityById(quizId);
         validateQuizUpdatability(quizEntity);
@@ -79,29 +67,21 @@ public class QuizService {
 
         quizEntity = quizRepository.save(quizEntity);
 
-        return quizMapper.toResponse(
-                quizEntity,
-                quizSecurityService.countUserSubmissionsToQuiz(user.getId(), quizEntity.getId())
-        );
+        return quizMapper.toResponse(quizEntity);
     }
 
     public QuizResponse getQuiz(
-            UUID quizId,
-            AuthenticatedUser user
+            UUID quizId
     ) {
         final QuizEntity quizEntity = findQuizEntityById(quizId);
 
-        return quizMapper.toResponse(
-                quizEntity,
-                quizSecurityService.countUserSubmissionsToQuiz(user.getId(), quizEntity.getId())
-        );
+        return quizMapper.toResponse(quizEntity);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') or @quizSecurityService.isUserQuizOwner(authentication.principal.id, #quizId)")
     public QuizResponse upsertQuestions(
             UUID quizId,
-            QuizQuestionsUpsertRequest request,
-            AuthenticatedUser user
+            QuizQuestionsUpsertRequest request
     ) {
         final QuizEntity quizEntity = findQuizEntityById(quizId);
 
@@ -117,10 +97,7 @@ public class QuizService {
                         .peek(questionEntity -> questionEntity.setQuiz(quizEntity))
                         .toList());
 
-        return quizMapper.toResponse(
-                quizRepository.save(quizEntity),
-                quizSecurityService.countUserSubmissionsToQuiz(user.getId(), quizEntity.getId())
-        );
+        return quizMapper.toResponse(quizRepository.save(quizEntity));
     }
 
     private static void validateQuizUpdatability(
@@ -136,8 +113,7 @@ public class QuizService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN') or @quizSecurityService.isUserQuizOwner(authentication.principal.id, #quizId)")
     public QuizResponse startQuiz(
-            UUID quizId,
-            AuthenticatedUser user
+            UUID quizId
     ) {
         final QuizEntity quizEntity = findQuizEntityById(quizId);
 
@@ -147,16 +123,12 @@ public class QuizService {
 
         quizEntity.setStatus(QuizStatus.ACTIVE);
 
-        return quizMapper.toResponse(
-                quizRepository.save(quizEntity),
-                quizSecurityService.countUserSubmissionsToQuiz(user.getId(), quizEntity.getId())
-        );
+        return quizMapper.toResponse(quizRepository.save(quizEntity));
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') or @quizSecurityService.isUserQuizOwner(authentication.principal.id, #quizId)")
     public QuizResponse finishQuiz(
-            UUID quizId,
-            AuthenticatedUser user
+            UUID quizId
     ) {
         final QuizEntity quizEntity = findQuizEntityById(quizId);
 
@@ -166,20 +138,12 @@ public class QuizService {
 
         quizEntity.setStatus(QuizStatus.FINISHED);
 
-        return quizMapper.toResponse(
-                quizRepository.save(quizEntity),
-                quizSecurityService.countUserSubmissionsToQuiz(user.getId(), quizEntity.getId())
-        );
+        return quizMapper.toResponse(quizRepository.save(quizEntity));
     }
 
-    @PreAuthorize("""
-        hasRole('ROLE_ADMIN') or
-        @quizSecurityService.countUserSubmissionsToQuiz(authentication.principal.id, #quizId) < 1
-        """)
     public SubmissionResponse createSubmission(
             UUID quizId,
-            SubmissionCreateRequest request,
-            AuthenticatedUser user
+            SubmissionCreateRequest request
     ) {
         final QuizEntity quizEntity = findQuizEntityById(quizId);
 
@@ -225,7 +189,6 @@ public class QuizService {
 
         submissionEntity.setQuiz(quizEntity);
         submissionEntity.setAnswers(answers);
-        submissionEntity.setOwner(userService.getUserReference(user));
 
         final SubmissionEntity savedSubmissionEntity =
                 submissionRepository.save(submissionEntity);
@@ -254,8 +217,7 @@ public class QuizService {
     @PreAuthorize("hasRole('ROLE_ADMIN') or @quizSecurityService.isUserQuizOwner(authentication.principal.id, #quizId)")
     public QuizResponse aiGenerateQuestions(
             UUID quizId,
-            AiGenerateQuestionsRequest request,
-            AuthenticatedUser user
+            AiGenerateQuestionsRequest request
     ) {
         final QuizEntity quizEntity = findQuizEntityById(quizId);
 
@@ -273,7 +235,7 @@ public class QuizService {
                 .questions(newQuestions)
                 .build();
 
-        return upsertQuestions(quizId, quizQuestionsUpsertRequest, user);
+        return upsertQuestions(quizId, quizQuestionsUpsertRequest);
     }
 
     private QuizEntity findQuizEntityById(UUID quizId) {
@@ -282,11 +244,12 @@ public class QuizService {
                 .orElseThrow(() -> new EntityNotFoundException("Quiz with id " + quizId + " not found"));
     }
 
-    public QuizzesResponse getUserQuizzes(AuthenticatedUser user) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or authentication.principal.id == #userId")
+    public QuizzesResponse getUserQuizzes(UUID userId) {
         return QuizzesResponse
                 .builder()
                 .quizzes(quizRepository
-                        .findByOwnerId(user.getId())
+                        .findByOwnerId(userId)
                         .stream()
                         .sorted(Comparator.comparing(QuizEntity::getCreatedDate).reversed())
                         .map(quizMapper::toShortResponse)

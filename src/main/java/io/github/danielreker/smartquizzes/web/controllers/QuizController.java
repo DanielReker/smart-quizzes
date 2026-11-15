@@ -1,6 +1,5 @@
 package io.github.danielreker.smartquizzes.web.controllers;
 
-import io.github.danielreker.smartquizzes.model.auth.AuthenticatedUser;
 import io.github.danielreker.smartquizzes.services.QuizService;
 import io.github.danielreker.smartquizzes.web.QuizUpdateRequest;
 import io.github.danielreker.smartquizzes.web.dtos.*;
@@ -10,7 +9,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -27,10 +25,9 @@ class QuizController {
     @Operation(security = { @SecurityRequirement(name = "bearer-key") })
     @PostMapping
     public ResponseEntity<QuizResponse> createQuiz(
-            @RequestBody @Valid QuizCreateRequest request,
-            @AuthenticationPrincipal AuthenticatedUser user
+            @RequestBody @Valid QuizCreateRequest request
     ) {
-        final QuizResponse response = quizService.createQuiz(request, user);
+        final QuizResponse response = quizService.createQuiz(request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -41,11 +38,10 @@ class QuizController {
     @PatchMapping("/{quizId}")
     public ResponseEntity<QuizResponse> updateQuiz(
             @PathVariable UUID quizId,
-            @RequestBody @Valid QuizUpdateRequest request,
-            @AuthenticationPrincipal AuthenticatedUser user
+            @RequestBody @Valid QuizUpdateRequest request
     ) {
         final QuizResponse response = quizService
-                .updateQuiz(quizId, request, user);
+                .updateQuiz(quizId, request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -55,10 +51,9 @@ class QuizController {
     @Operation(security = { @SecurityRequirement(name = "bearer-key") })
     @GetMapping("/{quizId}")
     public ResponseEntity<QuizResponse> getQuiz(
-            @PathVariable UUID quizId,
-            @AuthenticationPrincipal AuthenticatedUser user
+            @PathVariable UUID quizId
     ) {
-        final QuizResponse response = quizService.getQuiz(quizId, user);
+        final QuizResponse response = quizService.getQuiz(quizId);
 
         return ResponseEntity
                 .ok(response);
@@ -68,11 +63,10 @@ class QuizController {
     @PutMapping("/{quizId}/questions")
     public ResponseEntity<QuizResponse> upsertQuestions(
             @PathVariable UUID quizId,
-            @RequestBody @Valid QuizQuestionsUpsertRequest request,
-            @AuthenticationPrincipal AuthenticatedUser user
+            @RequestBody @Valid QuizQuestionsUpsertRequest request
     ) {
         final QuizResponse response = quizService
-                .upsertQuestions(quizId, request, user);
+                .upsertQuestions(quizId, request);
 
         return ResponseEntity
                 .ok(response);
@@ -81,10 +75,9 @@ class QuizController {
     @Operation(security = { @SecurityRequirement(name = "bearer-key") })
     @PostMapping("/{quizId}/requests/start")
     public ResponseEntity<QuizResponse> startQuiz(
-            @PathVariable UUID quizId,
-            @AuthenticationPrincipal AuthenticatedUser user
+            @PathVariable UUID quizId
     ) {
-        final QuizResponse response = quizService.startQuiz(quizId, user);
+        final QuizResponse response = quizService.startQuiz(quizId);
 
         return ResponseEntity
                 .ok(response);
@@ -93,10 +86,9 @@ class QuizController {
     @Operation(security = { @SecurityRequirement(name = "bearer-key") })
     @PostMapping("/{quizId}/requests/finish")
     public ResponseEntity<QuizResponse> finishQuiz(
-            @PathVariable UUID quizId,
-            @AuthenticationPrincipal AuthenticatedUser user
+            @PathVariable UUID quizId
     ) {
-        final QuizResponse response = quizService.finishQuiz(quizId, user);
+        final QuizResponse response = quizService.finishQuiz(quizId);
 
         return ResponseEntity
                 .ok(response);
@@ -106,11 +98,10 @@ class QuizController {
     @PostMapping("/{quizId}/submissions")
     public ResponseEntity<SubmissionResponse> createSubmission(
             @PathVariable UUID quizId,
-            @RequestBody @Valid SubmissionCreateRequest request,
-            @AuthenticationPrincipal AuthenticatedUser user
+            @RequestBody @Valid SubmissionCreateRequest request
     ) {
         final SubmissionResponse submissionResponse =
-                quizService.createSubmission(quizId, request, user);
+                quizService.createSubmission(quizId, request);
 
         return ResponseEntity
                 .ok(submissionResponse);
@@ -131,21 +122,22 @@ class QuizController {
     @PostMapping("/{quizId}/questions:ai-generate")
     public ResponseEntity<QuizResponse> aiGenerateQuestions(
             @PathVariable UUID quizId,
-            @RequestBody @Valid AiGenerateQuestionsRequest request,
-            @AuthenticationPrincipal AuthenticatedUser user
+            @RequestBody @Valid AiGenerateQuestionsRequest request
     ) {
-        final QuizResponse response = quizService.aiGenerateQuestions(quizId, request, user);
+        final QuizResponse response = quizService
+                .aiGenerateQuestions(quizId, request);
 
         return ResponseEntity
                 .ok(response);
     }
 
     @Operation(security = { @SecurityRequirement(name = "bearer-key") })
-    @GetMapping("/my")
-    public ResponseEntity<QuizzesResponse> getMyQuizzes(
-            @AuthenticationPrincipal AuthenticatedUser user
+    @GetMapping
+    public ResponseEntity<QuizzesResponse> getUserQuizzes(
+            @RequestParam UUID userId
     ) {
-        final QuizzesResponse response = quizService.getUserQuizzes(user);
+        final QuizzesResponse response = quizService
+                .getUserQuizzes(userId);
 
         return ResponseEntity
                 .ok(response);

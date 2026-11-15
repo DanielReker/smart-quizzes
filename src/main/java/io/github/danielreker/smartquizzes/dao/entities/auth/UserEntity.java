@@ -1,8 +1,6 @@
 package io.github.danielreker.smartquizzes.dao.entities.auth;
 
 import io.github.danielreker.smartquizzes.dao.entities.BaseEntity;
-import io.github.danielreker.smartquizzes.dao.entities.QuizEntity;
-import io.github.danielreker.smartquizzes.dao.entities.SubmissionEntity;
 import io.github.danielreker.smartquizzes.model.auth.UserRole;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -41,17 +39,5 @@ public class UserEntity extends BaseEntity {
 
     @Column(name = "password_hash", columnDefinition = "varchar(255)")
     private String passwordHash;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("createdDate ASC")
-    private List<UserSessionEntity> sessionTokens = new ArrayList<>();
-
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("createdDate ASC")
-    private List<QuizEntity> quizzes = new ArrayList<>();
-
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("createdDate ASC")
-    private List<SubmissionEntity> submissions = new ArrayList<>();
 
 }
