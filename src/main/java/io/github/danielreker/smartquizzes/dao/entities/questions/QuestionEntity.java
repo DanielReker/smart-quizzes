@@ -37,7 +37,7 @@ public abstract class QuestionEntity extends BaseEntity {
     private Integer position;
 
     @Column(name = "is_required", columnDefinition = "boolean", nullable = false)
-    private Boolean isRequired = false;
+    private Boolean isRequired;
 
     @Column(name = "max_score", columnDefinition = "numeric(10,3)", nullable = false, precision = 10, scale = 3)
     private BigDecimal maxScore;

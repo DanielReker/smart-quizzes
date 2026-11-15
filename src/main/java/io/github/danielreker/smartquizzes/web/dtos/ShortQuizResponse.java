@@ -2,12 +2,12 @@ package io.github.danielreker.smartquizzes.web.dtos;
 
 import io.github.danielreker.smartquizzes.dao.entities.QuizStatus;
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.extern.jackson.Jacksonized;
+import org.hibernate.validator.constraints.time.DurationMin;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -30,7 +30,18 @@ public record ShortQuizResponse(
     String description,
 
     @NotNull
-    QuizStatus status
+    QuizStatus status,
+
+    @Nullable
+    @DurationMin(seconds = 1)
+    Duration timeToComplete,
+
+    @NotNull
+    Boolean allowAnonymous,
+
+    @Nullable
+    @Min(1)
+    Integer maxAttempts
 
 ) {
 }

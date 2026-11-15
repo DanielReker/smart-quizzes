@@ -4,13 +4,13 @@ import io.github.danielreker.smartquizzes.dao.entities.QuizStatus;
 import io.github.danielreker.smartquizzes.web.dtos.questions.QuestionDto;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
+import org.hibernate.validator.constraints.time.DurationMin;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +36,17 @@ public class QuizResponse {
 
     @NotNull
     QuizStatus status;
+
+    @Nullable
+    @DurationMin(seconds = 1)
+    Duration timeToComplete;
+
+    @NotNull
+    Boolean allowAnonymous;
+
+    @Nullable
+    @Min(1)
+    Integer maxAttempts;
 
     @NotNull
     List<@NotNull @Valid QuestionDto> questions;

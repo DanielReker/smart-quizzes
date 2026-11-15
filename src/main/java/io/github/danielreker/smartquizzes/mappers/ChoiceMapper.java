@@ -13,7 +13,6 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface ChoiceMapper {
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "question", ignore = true)
     ChoiceEntity toEntity(ChoiceDto dto);
 

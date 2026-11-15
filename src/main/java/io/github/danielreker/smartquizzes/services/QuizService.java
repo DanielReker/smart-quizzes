@@ -13,6 +13,7 @@ import io.github.danielreker.smartquizzes.model.auth.AuthenticatedUser;
 import io.github.danielreker.smartquizzes.model.exceptions.InvalidQuizStatusException;
 import io.github.danielreker.smartquizzes.services.auth.UserService;
 import io.github.danielreker.smartquizzes.services.question.AiQuestionGeneratorService;
+import io.github.danielreker.smartquizzes.web.QuizUpdateRequest;
 import io.github.danielreker.smartquizzes.web.dtos.*;
 import io.github.danielreker.smartquizzes.web.dtos.answers.AnswerDto;
 import io.github.danielreker.smartquizzes.web.dtos.questions.QuestionDto;
@@ -66,6 +67,24 @@ public class QuizService {
         );
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @quizSecurityService.isUserQuizOwner(authentication.principal.id, #quizId)")
+    public QuizResponse updateQuiz(
+            UUID quizId,
+            QuizUpdateRequest request,
+            AuthenticatedUser user
+    ) {
+        QuizEntity quizEntity = findQuizEntityById(quizId);
+        validateQuizUpdatability(quizEntity);
+        quizMapper.updateEntityByRequest(quizEntity, request);
+
+        quizEntity = quizRepository.save(quizEntity);
+
+        return quizMapper.toResponse(
+                quizEntity,
+                quizSecurityService.countUserSubmissionsToQuiz(user.getId(), quizEntity.getId())
+        );
+    }
+
     public QuizResponse getQuiz(
             UUID quizId,
             AuthenticatedUser user
@@ -86,10 +105,7 @@ public class QuizService {
     ) {
         final QuizEntity quizEntity = findQuizEntityById(quizId);
 
-        if (quizEntity.getStatus() != QuizStatus.DRAFT) {
-            throw new InvalidQuizStatusException("Can't update questions in non-draft quiz, " +
-                    "its current status: " + quizEntity.getStatus());
-        }
+        validateQuizUpdatability(quizEntity);
 
         quizEntity.getQuestions().clear();
         quizEntity
@@ -105,6 +121,17 @@ public class QuizService {
                 quizRepository.save(quizEntity),
                 quizSecurityService.countUserSubmissionsToQuiz(user.getId(), quizEntity.getId())
         );
+    }
+
+    private static void validateQuizUpdatability(
+            QuizEntity quizEntity
+    ) {
+        if (quizEntity.getStatus() != QuizStatus.DRAFT) {
+            throw new InvalidQuizStatusException(
+                    "Can't update non-draft quiz, " +
+                            "its current status: " + quizEntity.getStatus()
+            );
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') or @quizSecurityService.isUserQuizOwner(authentication.principal.id, #quizId)")

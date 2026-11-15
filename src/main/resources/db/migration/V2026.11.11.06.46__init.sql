@@ -56,13 +56,16 @@ CREATE TABLE question
 
 CREATE TABLE quiz
 (
-    id           UUID                     NOT NULL,
-    version      INTEGER                  NOT NULL,
-    status       VARCHAR(50)              NOT NULL,
-    name         VARCHAR(255)             NOT NULL,
-    description  TEXT,
-    created_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    owner_id     UUID                     NOT NULL,
+    id               UUID                     NOT NULL,
+    version          INTEGER                  NOT NULL,
+    status           VARCHAR(50)              NOT NULL,
+    name             VARCHAR(255)             NOT NULL,
+    description      TEXT,
+    time_to_complete INTERVAL,
+    allow_anonymous  BOOLEAN                  NOT NULL,
+    max_attempts     INTEGER,
+    created_date     TIMESTAMP WITH TIME ZONE NOT NULL,
+    owner_id         UUID                     NOT NULL,
     CONSTRAINT pk_quiz PRIMARY KEY (id)
 );
 

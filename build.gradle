@@ -33,6 +33,7 @@ ext {
     set('pgvectorVersion', "0.1.6")
     set('hibernatePgvectorVersion', "7.4.14.Final")
     set('uuidCreatorVersion', "6.1.1")
+    set('jsonNullableVersion', "0.2.13")
 }
 
 dependencies {
@@ -70,6 +71,7 @@ dependencies {
     testImplementation 'org.testcontainers:testcontainers-postgresql'
     testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
     implementation "com.github.f4b6a3:uuid-creator:${uuidCreatorVersion}"
+    implementation "org.openapitools:jackson-databind-nullable:${jsonNullableVersion}"
 }
 
 tasks.named('test') {

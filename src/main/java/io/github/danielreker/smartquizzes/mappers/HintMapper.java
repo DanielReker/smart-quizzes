@@ -13,7 +13,6 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface HintMapper {
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "question", ignore = true)
     HintEntity toEntity(HintDto dto);
 

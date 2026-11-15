@@ -7,9 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Length;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +45,16 @@ public class QuizEntity extends BaseEntity {
 
     @Column(name = "description", columnDefinition = "text", length = Length.LONG32)
     private String description;
+
+    @JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
+    @Column(name = "time_to_complete", columnDefinition = "interval")
+    private Duration timeToComplete;
+
+    @Column(name = "allow_anonymous", columnDefinition = "boolean", nullable = false)
+    private Boolean allowAnonymous;
+
+    @Column(name = "max_attempts", columnDefinition = "int4")
+    private Integer maxAttempts;
 
     @CreatedDate
     @Column(name = "created_date", columnDefinition = "timestamptz", nullable = false)

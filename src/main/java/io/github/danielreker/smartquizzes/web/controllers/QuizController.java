@@ -2,6 +2,7 @@ package io.github.danielreker.smartquizzes.web.controllers;
 
 import io.github.danielreker.smartquizzes.model.auth.AuthenticatedUser;
 import io.github.danielreker.smartquizzes.services.QuizService;
+import io.github.danielreker.smartquizzes.web.QuizUpdateRequest;
 import io.github.danielreker.smartquizzes.web.dtos.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -30,6 +31,21 @@ class QuizController {
             @AuthenticationPrincipal AuthenticatedUser user
     ) {
         final QuizResponse response = quizService.createQuiz(request, user);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+    @Operation(security = { @SecurityRequirement(name = "bearer-key") })
+    @PatchMapping("/{quizId}")
+    public ResponseEntity<QuizResponse> updateQuiz(
+            @PathVariable UUID quizId,
+            @RequestBody @Valid QuizUpdateRequest request,
+            @AuthenticationPrincipal AuthenticatedUser user
+    ) {
+        final QuizResponse response = quizService
+                .updateQuiz(quizId, request, user);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

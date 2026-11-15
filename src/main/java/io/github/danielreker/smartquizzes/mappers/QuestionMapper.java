@@ -22,18 +22,15 @@ public interface QuestionMapper {
     @SubclassMapping(source = TextQuestionEntity.class, target = TextQuestionDto.class)
     QuestionDto toDto(QuestionEntity entity);
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "quiz", ignore = true)
     @Mapping(target = "hints", ignore = true)
     TextQuestionEntity toEntity(TextQuestionDto dto);
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "quiz", ignore = true)
     @Mapping(target = "possibleChoices", ignore = true)
     @Mapping(target = "hints", ignore = true)
     SingleChoiceQuestionEntity toEntity(SingleChoiceQuestionDto dto);
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "quiz", ignore = true)
     @Mapping(target = "possibleChoices", ignore = true)
     @Mapping(target = "hints", ignore = true)
