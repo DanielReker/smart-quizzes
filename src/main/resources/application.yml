@@ -42,3 +42,10 @@ springdoc:
       one-of-as-ref: true
       one-of-ref-suffix: Variant
   writer-with-order-by-keys: true
+
+db-scheduler:
+  heartbeat-interval: 1m
+  missed-heartbeats-limit: 4
+  polling-interval: 1s
+  polling-strategy: lock_and_fetch
+  threads: 20

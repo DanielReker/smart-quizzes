@@ -34,6 +34,7 @@ ext {
     set('hibernatePgvectorVersion', "7.4.14.Final")
     set('uuidCreatorVersion', "6.1.1")
     set('jsonNullableVersion', "0.2.13")
+    set('dbSchedulerVersion', "17.0.0")
 }
 
 dependencies {
@@ -72,6 +73,7 @@ dependencies {
     testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
     implementation "com.github.f4b6a3:uuid-creator:${uuidCreatorVersion}"
     implementation "org.openapitools:jackson-databind-nullable:${jsonNullableVersion}"
+    implementation "com.github.kagkarlsson:db-scheduler-spring-boot-4-starter:${dbSchedulerVersion}"
 }
 
 tasks.named('test') {

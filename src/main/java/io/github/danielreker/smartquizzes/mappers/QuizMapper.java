@@ -1,9 +1,9 @@
 package io.github.danielreker.smartquizzes.mappers;
 
-import io.github.danielreker.smartquizzes.dao.entities.QuizEntity;
-import io.github.danielreker.smartquizzes.web.QuizUpdateRequest;
+import io.github.danielreker.smartquizzes.dao.entities.quiz.QuizEntity;
 import io.github.danielreker.smartquizzes.web.dtos.QuizCreateRequest;
 import io.github.danielreker.smartquizzes.web.dtos.QuizResponse;
+import io.github.danielreker.smartquizzes.web.dtos.QuizUpdateRequest;
 import io.github.danielreker.smartquizzes.web.dtos.ShortQuizResponse;
 import org.mapstruct.*;
 
@@ -35,6 +35,7 @@ public interface QuizMapper {
 
     QuizResponse toResponse(QuizEntity entity);
 
+    @Mapping(target = "numberOfQuestions", ignore = true)
     ShortQuizResponse toShortResponse(QuizEntity entity);
 
 }

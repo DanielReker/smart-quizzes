@@ -5,8 +5,12 @@ CREATE TABLE answer
     version       INTEGER     NOT NULL,
     submission_id UUID        NOT NULL,
     question_id   UUID        NOT NULL,
+    score         numeric(10, 3),
+    answered_at   TIMESTAMP WITH TIME ZONE,
+    scored_at     TIMESTAMP WITH TIME ZONE,
     choice_id     UUID,
     value         TEXT,
+    feedback      TEXT,
     CONSTRAINT pk_answer PRIMARY KEY (id)
 );
 
@@ -71,12 +75,19 @@ CREATE TABLE quiz
 
 CREATE TABLE submission
 (
-    id           UUID                     NOT NULL,
-    version      INTEGER                  NOT NULL,
-    created_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    quiz_id      UUID                     NOT NULL,
-    owner_id     UUID                     NOT NULL,
+    id                   UUID                     NOT NULL,
+    version              INTEGER                  NOT NULL,
+    started_at           TIMESTAMP WITH TIME ZONE NOT NULL,
+    manually_finished_at TIMESTAMP WITH TIME ZONE,
+    quiz_id              UUID                     NOT NULL,
+    owner_id             UUID                     NOT NULL,
     CONSTRAINT pk_submission PRIMARY KEY (id)
+);
+
+CREATE TABLE submission_revealed_hint
+(
+    hint_id       UUID NOT NULL,
+    submission_id UUID NOT NULL
 );
 
 CREATE TABLE user_role
@@ -159,6 +170,14 @@ ALTER TABLE answer_choice
     ADD CONSTRAINT fk_anscho_on_multi_choice_answer_entity FOREIGN KEY (answer_id) REFERENCES answer (id);
 
 CREATE INDEX idx_answer_choice_answer_id ON answer_choice (answer_id);
+
+ALTER TABLE submission_revealed_hint
+    ADD CONSTRAINT fk_subrevhin_on_hint_entity FOREIGN KEY (hint_id) REFERENCES hint (id);
+
+ALTER TABLE submission_revealed_hint
+    ADD CONSTRAINT fk_subrevhin_on_submission_entity FOREIGN KEY (submission_id) REFERENCES submission (id);
+
+CREATE INDEX idx_submission_revealed_hint_submission_id ON submission_revealed_hint (submission_id);
 
 ALTER TABLE user_role
     ADD CONSTRAINT fk_user_role_on_user_entity FOREIGN KEY (user_id) REFERENCES users (id);

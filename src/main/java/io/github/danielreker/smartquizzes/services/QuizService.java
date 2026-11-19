@@ -1,19 +1,14 @@
 package io.github.danielreker.smartquizzes.services;
 
-import io.github.danielreker.smartquizzes.dao.entities.QuizEntity;
-import io.github.danielreker.smartquizzes.dao.entities.QuizStatus;
-import io.github.danielreker.smartquizzes.dao.entities.SubmissionEntity;
-import io.github.danielreker.smartquizzes.dao.entities.answers.AnswerEntity;
+import io.github.danielreker.smartquizzes.dao.entities.quiz.QuizEntity;
+import io.github.danielreker.smartquizzes.dao.entities.quiz.QuizStatus;
 import io.github.danielreker.smartquizzes.dao.repositories.QuizRepository;
 import io.github.danielreker.smartquizzes.dao.repositories.SubmissionRepository;
 import io.github.danielreker.smartquizzes.mappers.QuestionMapper;
 import io.github.danielreker.smartquizzes.mappers.QuizMapper;
-import io.github.danielreker.smartquizzes.mappers.SubmissionMapper;
 import io.github.danielreker.smartquizzes.model.exceptions.InvalidQuizStatusException;
 import io.github.danielreker.smartquizzes.services.question.AiQuestionGeneratorService;
-import io.github.danielreker.smartquizzes.web.QuizUpdateRequest;
 import io.github.danielreker.smartquizzes.web.dtos.*;
-import io.github.danielreker.smartquizzes.web.dtos.answers.AnswerDto;
 import io.github.danielreker.smartquizzes.web.dtos.questions.QuestionDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +16,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 
 @Transactional
 @RequiredArgsConstructor
@@ -36,13 +31,13 @@ public class QuizService {
 
     private final QuizMapper quizMapper;
 
-    private final SubmissionMapper submissionMapper;
-
     private final QuestionManagerService questionManagerService;
 
     private final QuestionMapper questionMapper;
 
     private final AiQuestionGeneratorService aiQuestionGeneratorService;
+
+    private final SubmissionService submissionService;
 
 
     public QuizResponse createQuiz(
@@ -70,12 +65,21 @@ public class QuizService {
         return quizMapper.toResponse(quizEntity);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @quizSecurityService.isUserQuizOwner(authentication.principal.id, #quizId)")
     public QuizResponse getQuiz(
             UUID quizId
     ) {
         final QuizEntity quizEntity = findQuizEntityById(quizId);
 
         return quizMapper.toResponse(quizEntity);
+    }
+
+    public ShortQuizResponse getQuizShort(
+            UUID quizId
+    ) {
+        final QuizEntity quizEntity = findQuizEntityById(quizId);
+
+        return buildShortResponse(quizEntity);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') or @quizSecurityService.isUserQuizOwner(authentication.principal.id, #quizId)")
@@ -118,7 +122,9 @@ public class QuizService {
         final QuizEntity quizEntity = findQuizEntityById(quizId);
 
         if (quizEntity.getStatus() != QuizStatus.DRAFT) {
-            throw new InvalidQuizStatusException("Can't start quiz, its current status: " + quizEntity.getStatus());
+            throw new InvalidQuizStatusException(
+                    "Can't start quiz, its current status: " + quizEntity.getStatus()
+            );
         }
 
         quizEntity.setStatus(QuizStatus.ACTIVE);
@@ -133,7 +139,9 @@ public class QuizService {
         final QuizEntity quizEntity = findQuizEntityById(quizId);
 
         if (quizEntity.getStatus() != QuizStatus.ACTIVE) {
-            throw new InvalidQuizStatusException("Can't finish quiz, its current status: " + quizEntity.getStatus());
+            throw new InvalidQuizStatusException(
+                    "Can't finish quiz, its current status: " + quizEntity.getStatus()
+            );
         }
 
         quizEntity.setStatus(QuizStatus.FINISHED);
@@ -142,58 +150,9 @@ public class QuizService {
     }
 
     public SubmissionResponse createSubmission(
-            UUID quizId,
-            SubmissionCreateRequest request
+            UUID quizId
     ) {
-        final QuizEntity quizEntity = findQuizEntityById(quizId);
-
-        if (quizEntity.getStatus() != QuizStatus.ACTIVE) {
-            throw new InvalidQuizStatusException("Can't create submission for non-active quiz, " +
-                    "its current status: " + quizEntity.getStatus());
-        }
-
-        final SubmissionEntity submissionEntity = new SubmissionEntity();
-
-        final Map<UUID, AnswerDto> questionIdToAnswerDto = request
-                .getAnswers()
-                .stream()
-                .collect(Collectors.toMap(
-                        AnswerDto::getQuestionId,
-                        Function.identity(),
-                        (answerDto, _) -> {
-                            throw new IllegalArgumentException("Duplicated answer found " +
-                                    "for question id " + answerDto.getQuestionId());
-                        }
-                ));
-
-        final List<AnswerEntity> answers = quizEntity
-                .getQuestions()
-                .stream()
-                .map(question -> {
-                    final Optional<AnswerEntity> answerEntity = Optional
-                            .ofNullable(questionIdToAnswerDto.get(question.getId()))
-                            .map(answerDto -> questionManagerService
-                                    .buildAnswer(question, answerDto));
-
-                    if (answerEntity.isEmpty() && question.getIsRequired()) {
-                        throw new IllegalArgumentException("Missing answer for " +
-                                "required question with id " + question.getId());
-                    }
-
-                    return answerEntity;
-
-                })
-                .flatMap(Optional::stream)
-                .peek(answerEntity -> answerEntity.setSubmission(submissionEntity))
-                .toList();
-
-        submissionEntity.setQuiz(quizEntity);
-        submissionEntity.setAnswers(answers);
-
-        final SubmissionEntity savedSubmissionEntity =
-                submissionRepository.save(submissionEntity);
-
-        return submissionMapper.toResponse(savedSubmissionEntity);
+        return submissionService.createSubmission(quizId);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') or @quizSecurityService.isUserQuizOwner(authentication.principal.id, #quizId)")
@@ -238,10 +197,12 @@ public class QuizService {
         return upsertQuestions(quizId, quizQuestionsUpsertRequest);
     }
 
-    private QuizEntity findQuizEntityById(UUID quizId) {
+    public QuizEntity findQuizEntityById(UUID quizId) {
         return quizRepository
                 .findById(quizId)
-                .orElseThrow(() -> new EntityNotFoundException("Quiz with id " + quizId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Quiz with id " + quizId + " not found"
+                ));
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') or authentication.principal.id == #userId")
@@ -252,8 +213,18 @@ public class QuizService {
                         .findByOwnerId(userId)
                         .stream()
                         .sorted(Comparator.comparing(QuizEntity::getCreatedDate).reversed())
-                        .map(quizMapper::toShortResponse)
+                        .map(this::buildShortResponse)
                         .toList())
+                .build();
+    }
+
+    private ShortQuizResponse buildShortResponse(
+            QuizEntity quizEntity
+    ) {
+        return quizMapper
+                .toShortResponse(quizEntity)
+                .toBuilder()
+                .numberOfQuestions(quizEntity.getQuestions().size())
                 .build();
     }
 }

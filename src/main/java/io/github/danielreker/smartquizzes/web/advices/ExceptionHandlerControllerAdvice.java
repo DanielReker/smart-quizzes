@@ -3,6 +3,7 @@ package io.github.danielreker.smartquizzes.web.advices;
 import io.github.danielreker.smartquizzes.model.exceptions.AnswerValidationException;
 import io.github.danielreker.smartquizzes.model.exceptions.InvalidPasswordException;
 import io.github.danielreker.smartquizzes.model.exceptions.InvalidQuizStatusException;
+import io.github.danielreker.smartquizzes.model.exceptions.InvalidSubmissionStatusException;
 import io.github.danielreker.smartquizzes.web.dtos.ErrorDto;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,12 @@ class ExceptionHandlerControllerAdvice {
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(InvalidQuizStatusException.class)
     ErrorDto handleInvalidQuizStatusException(InvalidQuizStatusException e) {
+        return new ErrorDto(e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(InvalidSubmissionStatusException.class)
+    ErrorDto handleInvalidSubmissionStatusException(InvalidSubmissionStatusException e) {
         return new ErrorDto(e.getMessage());
     }
 

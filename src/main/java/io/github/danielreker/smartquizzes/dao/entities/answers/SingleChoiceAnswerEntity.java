@@ -1,6 +1,7 @@
 package io.github.danielreker.smartquizzes.dao.entities.answers;
 
 import io.github.danielreker.smartquizzes.dao.entities.questions.ChoiceEntity;
+import io.github.danielreker.smartquizzes.dao.entities.questions.SingleChoiceQuestionEntity;
 import io.github.danielreker.smartquizzes.model.QuestionType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -15,7 +16,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @DiscriminatorValue(QuestionType.Names.SINGLE_CHOICE)
-public class SingleChoiceAnswerEntity extends AnswerEntity {
+public class SingleChoiceAnswerEntity
+        extends AnswerEntity<SingleChoiceQuestionEntity> {
 
     @Override
     public QuestionType getQuestionType() {

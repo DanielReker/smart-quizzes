@@ -1,4 +1,4 @@
-package io.github.danielreker.smartquizzes.web.dtos.answers;
+package io.github.danielreker.smartquizzes.web.dtos.answersubmitrequests;
 
 import io.github.danielreker.smartquizzes.model.QuestionType;
 import jakarta.validation.constraints.NotNull;
@@ -8,7 +8,6 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
-import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -16,14 +15,14 @@ import java.util.UUID;
 @Jacksonized
 @EqualsAndHashCode(callSuper = true)
 @ToString
-public class MultiChoiceAnswerDto extends AnswerDto {
+public class SingleChoiceAnswerSubmitRequest extends AnswerSubmitRequest {
 
     @Override
     public QuestionType getQuestionType() {
-        return QuestionType.MULTI_CHOICE;
+        return QuestionType.SINGLE_CHOICE;
     }
 
     @NotNull
-    private List<@NotNull UUID> selectedChoiceIds;
+    private UUID selectedChoiceId;
 
 }

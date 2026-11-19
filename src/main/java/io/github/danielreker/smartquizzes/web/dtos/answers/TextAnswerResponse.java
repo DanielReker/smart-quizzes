@@ -1,28 +1,33 @@
 package io.github.danielreker.smartquizzes.web.dtos.answers;
 
 import io.github.danielreker.smartquizzes.model.QuestionType;
-import jakarta.validation.constraints.NotNull;
+import jakarta.annotation.Nullable;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
-import java.util.UUID;
-
 @Getter
 @SuperBuilder(toBuilder = true)
 @Jacksonized
 @EqualsAndHashCode(callSuper = true)
 @ToString
-public class SingleChoiceAnswerDto extends AnswerDto {
+public class TextAnswerResponse
+        extends AnswerResponse<TextAnswerResponse> {
 
     @Override
     public QuestionType getQuestionType() {
-        return QuestionType.SINGLE_CHOICE;
+        return QuestionType.TEXT;
     }
 
-    @NotNull
-    private UUID selectedChoiceId;
+    @Nullable
+    private final String value;
+
+    @Nullable
+    private final String feedback;
+
+    @Nullable
+    private final String sampleCorrectAnswer;
 
 }

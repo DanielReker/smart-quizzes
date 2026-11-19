@@ -1,31 +1,23 @@
 package io.github.danielreker.smartquizzes.services.question;
 
-import io.github.danielreker.smartquizzes.dao.entities.answers.MultiChoiceAnswerEntity;
-import io.github.danielreker.smartquizzes.dao.entities.questions.ChoiceEntity;
 import io.github.danielreker.smartquizzes.dao.entities.questions.MultiChoiceQuestionEntity;
 import io.github.danielreker.smartquizzes.dao.repositories.answers.MultiChoiceAnswerRepository;
 import io.github.danielreker.smartquizzes.mappers.ChoiceMapper;
 import io.github.danielreker.smartquizzes.mappers.HintMapper;
 import io.github.danielreker.smartquizzes.mappers.QuestionMapper;
 import io.github.danielreker.smartquizzes.model.QuestionType;
-import io.github.danielreker.smartquizzes.web.dtos.answers.MultiChoiceAnswerDto;
 import io.github.danielreker.smartquizzes.web.dtos.questions.MultiChoiceQuestionDto;
 import io.github.danielreker.smartquizzes.web.dtos.stats.ChoiceStatsDto;
 import io.github.danielreker.smartquizzes.web.dtos.stats.MultiChoiceQuestionStatsDto;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Objects;
 
 @Service
 public class MultiChoiceQuestionService
-        extends QuestionService<MultiChoiceQuestionEntity, MultiChoiceQuestionDto, MultiChoiceAnswerDto> {
+        extends QuestionService<MultiChoiceQuestionEntity, MultiChoiceQuestionDto> {
 
     private final ChoiceMapper choiceMapper;
 
     private final MultiChoiceAnswerRepository multiChoiceAnswerRepository;
-
 
     public MultiChoiceQuestionService(
             HintMapper hintMapper,
@@ -38,30 +30,9 @@ public class MultiChoiceQuestionService
         this.multiChoiceAnswerRepository = multiChoiceAnswerRepository;
     }
 
-
     @Override
     public QuestionType getQuestionType() {
         return QuestionType.MULTI_CHOICE;
-    }
-
-    @Override
-    public MultiChoiceAnswerEntity buildConcreteAnswer(MultiChoiceQuestionEntity question, MultiChoiceAnswerDto answerDto) {
-        final List<ChoiceEntity> choices = answerDto
-                .getSelectedChoiceIds()
-                .stream()
-                .map(selectedChoiceId -> question
-                        .getPossibleChoices()
-                        .stream()
-                        .filter(item -> Objects.equals(item.getId(), selectedChoiceId))
-                        .findFirst()
-                        .orElseThrow(() -> new EntityNotFoundException("Could not find choice with id " +
-                                selectedChoiceId + " in question " + question.getId())))
-                .toList();
-
-        final MultiChoiceAnswerEntity answerEntity = new MultiChoiceAnswerEntity();
-        answerEntity.setSelectedChoices(choices);
-        answerEntity.setQuestion(question);
-        return answerEntity;
     }
 
     @Override

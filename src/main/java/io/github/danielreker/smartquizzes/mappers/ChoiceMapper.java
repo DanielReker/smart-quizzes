@@ -16,4 +16,6 @@ public interface ChoiceMapper {
     @Mapping(target = "question", ignore = true)
     ChoiceEntity toEntity(ChoiceDto dto);
 
+    ChoiceDto toDto(ChoiceEntity entity);
+
 }

@@ -1,6 +1,6 @@
 package io.github.danielreker.smartquizzes.dao.repositories;
 
-import io.github.danielreker.smartquizzes.dao.entities.QuizEntity;
+import io.github.danielreker.smartquizzes.dao.entities.quiz.QuizEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

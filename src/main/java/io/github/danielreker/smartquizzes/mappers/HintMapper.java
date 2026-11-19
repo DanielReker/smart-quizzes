@@ -16,4 +16,6 @@ public interface HintMapper {
     @Mapping(target = "question", ignore = true)
     HintEntity toEntity(HintDto dto);
 
+    HintDto toDto(HintEntity entity);
+
 }

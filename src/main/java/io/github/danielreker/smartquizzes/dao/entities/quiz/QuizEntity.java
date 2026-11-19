@@ -1,7 +1,9 @@
-package io.github.danielreker.smartquizzes.dao.entities;
+package io.github.danielreker.smartquizzes.dao.entities.quiz;
 
+import io.github.danielreker.smartquizzes.dao.entities.BaseEntity;
 import io.github.danielreker.smartquizzes.dao.entities.auth.UserEntity;
 import io.github.danielreker.smartquizzes.dao.entities.questions.QuestionEntity;
+import io.github.danielreker.smartquizzes.dao.entities.submission.SubmissionEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,7 +36,7 @@ public class QuizEntity extends BaseEntity {
     private List<QuestionEntity> questions = new ArrayList<>();
 
     @OneToMany(mappedBy = "quiz", orphanRemoval = true, cascade = CascadeType.ALL)
-    @OrderBy("createdDate ASC")
+    @OrderBy("startedAt ASC")
     private List<SubmissionEntity> submissions = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)

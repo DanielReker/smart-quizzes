@@ -1,6 +1,6 @@
 package io.github.danielreker.smartquizzes.web.dtos;
 
-import io.github.danielreker.smartquizzes.dao.entities.QuizStatus;
+import io.github.danielreker.smartquizzes.dao.entities.quiz.QuizStatus;
 import io.github.danielreker.smartquizzes.web.dtos.questions.QuestionDto;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;

@@ -1,7 +1,6 @@
 package io.github.danielreker.smartquizzes.web.controllers;
 
 import io.github.danielreker.smartquizzes.services.QuizService;
-import io.github.danielreker.smartquizzes.web.QuizUpdateRequest;
 import io.github.danielreker.smartquizzes.web.dtos.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -16,7 +15,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/quizzes")
-@CrossOrigin
 class QuizController {
 
     private final QuizService quizService;
@@ -53,7 +51,20 @@ class QuizController {
     public ResponseEntity<QuizResponse> getQuiz(
             @PathVariable UUID quizId
     ) {
-        final QuizResponse response = quizService.getQuiz(quizId);
+        final QuizResponse response = quizService
+                .getQuiz(quizId);
+
+        return ResponseEntity
+                .ok(response);
+    }
+
+    @Operation(security = { @SecurityRequirement(name = "bearer-key") })
+    @GetMapping("/{quizId}/short")
+    public ResponseEntity<ShortQuizResponse> getQuizShort(
+            @PathVariable UUID quizId
+    ) {
+        final ShortQuizResponse response = quizService
+                .getQuizShort(quizId);
 
         return ResponseEntity
                 .ok(response);
@@ -97,14 +108,14 @@ class QuizController {
     @Operation(security = { @SecurityRequirement(name = "bearer-key") })
     @PostMapping("/{quizId}/submissions")
     public ResponseEntity<SubmissionResponse> createSubmission(
-            @PathVariable UUID quizId,
-            @RequestBody @Valid SubmissionCreateRequest request
+            @PathVariable UUID quizId
     ) {
         final SubmissionResponse submissionResponse =
-                quizService.createSubmission(quizId, request);
+                quizService.createSubmission(quizId);
 
         return ResponseEntity
-                .ok(submissionResponse);
+                .status(HttpStatus.CREATED)
+                .body(submissionResponse);
     }
 
     @Operation(security = { @SecurityRequirement(name = "bearer-key") })

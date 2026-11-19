@@ -1,7 +1,7 @@
 package io.github.danielreker.smartquizzes.dao.entities.questions;
 
 import io.github.danielreker.smartquizzes.dao.entities.BaseEntity;
-import io.github.danielreker.smartquizzes.dao.entities.QuizEntity;
+import io.github.danielreker.smartquizzes.dao.entities.quiz.QuizEntity;
 import io.github.danielreker.smartquizzes.model.QuestionType;
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,6 +1,7 @@
 package io.github.danielreker.smartquizzes.dao.entities.answers;
 
 import io.github.danielreker.smartquizzes.dao.entities.questions.ChoiceEntity;
+import io.github.danielreker.smartquizzes.dao.entities.questions.MultiChoiceQuestionEntity;
 import io.github.danielreker.smartquizzes.model.QuestionType;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -15,7 +16,8 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @DiscriminatorValue(QuestionType.Names.MULTI_CHOICE)
-public class MultiChoiceAnswerEntity extends AnswerEntity {
+public class MultiChoiceAnswerEntity
+        extends AnswerEntity<MultiChoiceQuestionEntity> {
 
     @Override
     public QuestionType getQuestionType() {

@@ -24,7 +24,7 @@ public class ChoiceDto {
     @Min(0)
     Integer position;
 
-    @NotNull
+    @Nullable
     Boolean isCorrect;
 
 }

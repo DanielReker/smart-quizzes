@@ -1,5 +1,6 @@
 package io.github.danielreker.smartquizzes.dao.entities.answers;
 
+import io.github.danielreker.smartquizzes.dao.entities.questions.TextQuestionEntity;
 import io.github.danielreker.smartquizzes.model.QuestionType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -14,7 +15,8 @@ import org.hibernate.Length;
 @NoArgsConstructor
 @Entity
 @DiscriminatorValue(QuestionType.Names.TEXT)
-public class TextAnswerEntity extends AnswerEntity {
+public class TextAnswerEntity
+        extends AnswerEntity<TextQuestionEntity> {
 
     @Override
     public QuestionType getQuestionType() {
@@ -23,5 +25,8 @@ public class TextAnswerEntity extends AnswerEntity {
 
     @Column(name = "value", columnDefinition = "text", length = Length.LONG32)
     private String value;
+
+    @Column(name = "feedback", columnDefinition = "text", length = Length.LONG32)
+    private String feedback;
 
 }
